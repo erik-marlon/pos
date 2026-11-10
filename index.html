@@ -192,16 +192,15 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .doc .s1t{flex:1;min-width:0}
 .doc .pgal{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:flex-end;max-width:360px}
 .doc .pf{width:104px;text-align:center}
-.doc .pf img{display:block;width:104px;height:84px;object-fit:contain;margin:0 auto 2px}
+.doc .pf img{display:block;margin:0 auto 3px}
 .doc .pf b{display:block;font-size:8.5px;line-height:1.25;color:#1D1D1B}
 .doc .pf span{display:block;font-size:7.5px;line-height:1.25;color:#6E6A78;margin-top:1px}
 .doc .s1w.col{flex-direction:column;gap:6px;align-items:stretch}
 .doc .pgal.m,.doc .pgal.s{max-width:none;flex-wrap:nowrap;justify-content:space-between;gap:8px;padding-top:6px;border-top:1px solid #E6E2EE}
 .doc .pgal.m .pf,.doc .pgal.s .pf{flex:1 1 0;width:auto;max-width:150px}
-.doc .pgal.m .pf img,.doc .pgal.s .pf img{width:100%;height:60px}
 .doc .pgal.m .pf span,.doc .pgal.s .pf span{display:none}
-.doc .pgal.s .pf img{height:52px}.doc .pgal.s .pf b{font-size:7.5px}
-.doc .cmp th .pth{display:block;height:50px;max-width:100%;object-fit:contain;object-position:left;margin-bottom:3px}
+.doc .pgal.s .pf b{font-size:7.5px}
+.doc .cmp th .pth{display:block;margin-bottom:3px}
 .doc .cmp{width:100%;margin-top:7px;font-size:10px;table-layout:fixed}
 .doc .cmp th{text-align:left;vertical-align:bottom;padding:2px 8px 5px 0;border-bottom:1.5px solid #4A2A7C;font-weight:600}
 .doc .cmp th .ol{display:block;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:#4A2A7C;font-weight:700}
@@ -487,11 +486,13 @@ function syncProds(S){
   var n=ids.filter(Boolean).length;
   $('prodHint').textContent=n?(n+(n===1?' produto marcado.':' produtos marcados.')+(n>6?' O PDF mostra até 6.':'')):'Marque os produtos do orçamento para a foto aparecer no PDF. Os que aparecem na proposta são marcados sozinhos.';
 }
+function pimg(p,bw,bh,cls){var k=Math.min(bw/p.w,bh/p.h),w=Math.round(p.w*k),h=Math.round(p.h*k);return '<img'+(cls?' class="'+cls+'"':'')+' alt="" src="'+p.img+'" width="'+w+'" height="'+h+'" style="width:'+w+'px;height:'+h+'px">'}
 function galHTML(sel){
   if(!sel.length)return '';
   sel=sel.slice(0,6);
+  var bw=104,bh=84; if(sel.length>4){bw=110;bh=52}else if(sel.length>2){bw=120;bh=60}
   return '<div class="pgal'+(sel.length>4?' s':sel.length>2?' m':'')+'">'+sel.map(function(p){
-    return '<div class="pf"><img alt="" src="'+p.img+'"><b>'+esc(p.n)+'</b>'+(p.d?'<span>'+esc(p.d)+'</span>':'')+'</div>';
+    return '<div class="pf">'+pimg(p,bw,bh)+'<b>'+esc(p.n)+'</b>'+(p.d?'<span>'+esc(p.d)+'</span>':'')+'</div>';
   }).join('')+'</div>';
 }
 function rowsOf(S){
@@ -506,7 +507,7 @@ function cmpHTML(rows,S){
   var n=rows.length,showP=!!S.cmpPreco,rec=parseInt(S.recIdx,10),h,psel=prodsSel(S);
   var hasD=rows.some(function(r){return r.d&&r.d.trim()}),hasQ=rows.some(function(r){return r.q>1});
   function cells(fn){return rows.map(function(r,i){return '<td>'+fn(r,i)+'</td>'}).join('')}
-  h='<table class="cmp"><tr><th class="c0"></th>'+rows.map(function(r,i){return '<th>'+(function(){var p=prodFor(r.n,psel);return p?'<img class="pth" alt="" src="'+p.img+'">':''})()+'<span class="ol">Opção '+(i+1)+'</span><span class="on">'+esc(r.n)+'</span></th>'}).join('')+'</tr>';
+  h='<table class="cmp"><tr><th class="c0"></th>'+rows.map(function(r,i){return '<th>'+(function(){var p=prodFor(r.n,psel);return p?pimg(p,170,50,'pth'):''})()+'<span class="ol">Opção '+(i+1)+'</span><span class="on">'+esc(r.n)+'</span></th>'}).join('')+'</tr>';
   if(hasQ)h+='<tr><td class="c0">Quantidade</td>'+cells(function(r){return String(r.q||1)})+'</tr>';
   if(hasD)h+='<tr><td class="c0">Indicada quando</td>'+cells(function(r){return esc((r.d||'').trim()).replace(/\n/g,'<br>')||'—'})+'</tr>';
   if(showP)h+='<tr><td class="c0">Valor total</td>'+cells(function(r){return brl(r.v)})+'</tr>';
